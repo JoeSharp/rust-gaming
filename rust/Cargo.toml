@@ -1,3 +1,3 @@
 [workspace]
 resolver = "3"
-members = [ "arr2d", "go", "game-of-life" ]
+members = [ "arr2d", "go", "game-of-life" , "graphics"]
