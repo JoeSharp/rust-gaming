@@ -97,6 +97,18 @@ mod tests {
     }
 
     #[test]
+    fn get_set_out_of_bounds() {
+        let data = vec![
+            1.3, 5.6, // row
+            7.4, 9.2, // row
+        ];
+        let mut m = Matrix::new(2, 2, data).expect("Matrix should create");
+
+        m.get(3, 0).unwrap_err();
+        m.set(2, 5, 6.7).unwrap_err();
+    }
+
+    #[test]
     fn create_invalid_matrix() {
         let data = vec![1.0, 2.0, 3.0];
         let m = Matrix::new(2, 2, data);
