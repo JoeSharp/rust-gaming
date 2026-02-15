@@ -42,7 +42,12 @@ impl Matrix {
         if column >= self.columns {
             return Err(MatrixError::InvalidIndex(row, column));
         }
-        return Ok(column + (row * self.columns));
+
+        Ok(self.get_index_ok(row, column))
+    }
+
+    fn get_index_ok(&self, row: usize, column: usize) -> usize {
+        column + (row * self.columns)
     }
 
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
@@ -71,6 +76,29 @@ impl Matrix {
         for index in 0..self.data.len() {
             result.data[index] = self.data[index] + other.data[index];
         }
+        Ok(result)
+    }
+
+    pub fn multiply(&self, other: &Matrix) -> Result<Matrix, MatrixError> {
+        if self.rows != other.columns || self.columns != other.rows {
+            return Err(MatrixError::IncompatibleDimensions);
+        }
+
+        let mut result = Matrix::zeros(self.rows, other.columns);
+        for row in 0..self.rows {
+            for column in 0..other.columns {
+                let mut r = 0.0;
+                for elem in 0..self.columns {
+                    let s_index = self.get_index_ok(row, elem);
+                    let o_index = other.get_index_ok(elem, column);
+                    r = r + (self.data[s_index] * other.data[o_index]);
+                }
+
+                let index = result.get_index_ok(row, column);
+                result.data[index] = r;
+            }
+        }
+
         Ok(result)
     }
 }
@@ -130,11 +158,41 @@ mod tests {
         let m1 = Matrix::new(2, 2, vec![1.0, 2.0, 3.0, 4.0]).expect("e");
         let m2 = Matrix::new(2, 2, vec![5.0, 6.0, 7.0, 8.0]).expect("e");
 
-        let m_add = m1.sum(&m2).expect("Addition should succeed");
+        let result = m1.sum(&m2).expect("Addition should succeed");
 
-        assert_eq!(m_add.get(0, 0).expect("r00"), 6.0);
-        assert_eq!(m_add.get(0, 1).expect("r00"), 8.0);
-        assert_eq!(m_add.get(1, 0).expect("r00"), 10.0);
-        assert_eq!(m_add.get(1, 1).expect("r00"), 12.0);
+        assert_eq!(result.get(0, 0).expect("r00"), 6.0);
+        assert_eq!(result.get(0, 1).expect("r00"), 8.0);
+        assert_eq!(result.get(1, 0).expect("r00"), 10.0);
+        assert_eq!(result.get(1, 1).expect("r00"), 12.0);
+    }
+
+    #[test]
+    fn check_multiplication() {
+        let m1 = Matrix::new(
+            2,
+            3,
+            vec![
+                1.0, 2.0, 3.0, // row
+                4.0, 5.0, 6.0, // row
+            ],
+        )
+        .expect("m1");
+        let m2 = Matrix::new(
+            3,
+            2,
+            vec![
+                7.0, 8.0, // row
+                9.0, 10.0, // row
+                11.0, 12.0, // row
+            ],
+        )
+        .expect("m2");
+
+        let result = m1.multiply(&m2).expect("Multiply should work");
+
+        assert_eq!(result.get(0, 0).expect("r00"), 58.0);
+        assert_eq!(result.get(0, 1).expect("r00"), 64.0);
+        assert_eq!(result.get(1, 0).expect("r00"), 139.0);
+        assert_eq!(result.get(1, 1).expect("r00"), 154.0);
     }
 }
