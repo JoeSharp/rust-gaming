@@ -8,6 +8,7 @@ pub struct Matrix {
 #[derive(Debug, PartialEq)]
 pub enum MatrixError {
     IncorrectDataSize,
+    IncompatibleDimensions,
     InvalidIndex(usize, usize),
 }
 
@@ -60,6 +61,18 @@ impl Matrix {
             Err(e) => Err(e),
         };
     }
+
+    pub fn sum(&self, other: &Matrix) -> Result<Matrix, MatrixError> {
+        if self.rows != other.rows || self.columns != other.columns {
+            return Err(MatrixError::IncompatibleDimensions);
+        }
+
+        let mut result = Matrix::zeros(self.rows, self.columns);
+        for index in 0..self.data.len() {
+            result.data[index] = self.data[index] + other.data[index];
+        }
+        Ok(result)
+    }
 }
 
 #[cfg(test)]
@@ -98,11 +111,7 @@ mod tests {
 
     #[test]
     fn get_set_out_of_bounds() {
-        let data = vec![
-            1.3, 5.6, // row
-            7.4, 9.2, // row
-        ];
-        let mut m = Matrix::new(2, 2, data).expect("Matrix should create");
+        let mut m = Matrix::zeros(2, 2);
 
         m.get(3, 0).unwrap_err();
         m.set(2, 5, 6.7).unwrap_err();
@@ -114,5 +123,18 @@ mod tests {
         let m = Matrix::new(2, 2, data);
 
         assert!(m.is_err());
+    }
+
+    #[test]
+    fn check_addition() {
+        let m1 = Matrix::new(2, 2, vec![1.0, 2.0, 3.0, 4.0]).expect("e");
+        let m2 = Matrix::new(2, 2, vec![5.0, 6.0, 7.0, 8.0]).expect("e");
+
+        let m_add = m1.sum(&m2).expect("Addition should succeed");
+
+        assert_eq!(m_add.get(0, 0).expect("r00"), 6.0);
+        assert_eq!(m_add.get(0, 1).expect("r00"), 8.0);
+        assert_eq!(m_add.get(1, 0).expect("r00"), 10.0);
+        assert_eq!(m_add.get(1, 1).expect("r00"), 12.0);
     }
 }
