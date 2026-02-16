@@ -1,3 +1,6 @@
+#[allow(unused_imports)]
+use crate::matrix;
+
 #[derive(PartialEq, Debug)]
 pub struct Matrix {
     pub rows: usize,
@@ -167,11 +170,14 @@ mod tests {
 
     #[test]
     fn create_valid_matrix() {
-        let data = vec![
-            1.0, 2.0, // row 1
-            3.0, 4.0, // row 2
-        ];
-        let m = Matrix::new(2, 2, data);
+        let m = Matrix::new(
+            2,
+            2,
+            vec![
+                1.0, 2.0, // row
+                3.0, 4.0,
+            ],
+        );
 
         assert!(m.is_ok());
     }
@@ -191,12 +197,13 @@ mod tests {
 
     #[test]
     fn get_and_set_matrix_elements() {
-        let data = vec![
-            4.0, 8.0, 3.0, // row
-            2.1, 5.6, 9.8, // row
-            3.9, 9.3, 5.4,
-        ];
-        let mut m = Matrix::new(3, 3, data).expect("Matrix should succeed");
+        let mut m = matrix!(
+            rows: 3,
+            cols: 3,
+            4.0, 8.0, 3.0;
+            2.1, 5.6, 9.8;
+            3.9, 9.3, 5.4
+        );
 
         let at12 = m.get(1, 2).expect("Index should be valid");
         let at20 = m.get(2, 0).expect("Index should be valid");
@@ -226,8 +233,18 @@ mod tests {
 
     #[test]
     fn check_addition() {
-        let m1 = Matrix::new(2, 2, vec![1.0, 2.0, 3.0, 4.0]).expect("e");
-        let m2 = Matrix::new(2, 2, vec![5.0, 6.0, 7.0, 8.0]).expect("e");
+        let m1 = matrix!(
+            rows: 2,
+            cols: 2,
+            1.0, 2.0;
+            3.0, 4.0
+        );
+        let m2 = matrix!(
+            rows: 2,
+            cols: 2,
+            5.0, 6.0;
+            7.0, 8.0
+        );
 
         let result = m1.sum(&m2).expect("Addition should succeed");
 
@@ -239,25 +256,19 @@ mod tests {
 
     #[test]
     fn check_multiplication() {
-        let m1 = Matrix::new(
-            2,
-            3,
-            vec![
-                1.0, 2.0, 3.0, // row
-                4.0, 5.0, 6.0, // row
-            ],
-        )
-        .expect("m1");
-        let m2 = Matrix::new(
-            3,
-            2,
-            vec![
-                7.0, 8.0, // row
-                9.0, 10.0, // row
-                11.0, 12.0, // row
-            ],
-        )
-        .expect("m2");
+        let m1 = matrix!(
+            rows: 2,
+            cols: 3,
+            1.0, 2.0, 3.0;
+            4.0, 5.0, 6.0
+        );
+        let m2 = matrix!(
+            rows: 3,
+            cols: 2,
+            7.0, 8.0;
+            9.0, 10.0;
+            11.0, 12.0
+        );
 
         let result = m1.multiply(&m2).expect("Multiply should work");
 
@@ -283,15 +294,12 @@ mod tests {
         }
         let cases = vec![
             Case {
-                matrix: Matrix::new(
-                    2,
-                    2,
-                    vec![
-                        1.0, 2.0, // row
-                        3.0, 4.0, // row
-                    ],
-                )
-                .expect("m"),
+                matrix: matrix!(
+                    rows: 2,
+                    cols: 2,
+                    1.0, 2.0;
+                    3.0, 4.0
+                ),
                 expected: -2.0,
             },
             Case {
@@ -303,70 +311,55 @@ mod tests {
                 expected: 1.0,
             },
             Case {
-                matrix: Matrix::new(
-                    3,
-                    3,
-                    vec![
-                        1.0, 2.0, 3.0, // row
-                        4.0, 5.0, 6.0, // row
-                        7.0, 8.0, 9.0, // row
-                    ],
-                )
-                .expect("3x3"),
+                matrix: matrix!(
+                    rows: 3,
+                    cols: 3,
+                    1.0, 2.0, 3.0;
+                    4.0, 5.0, 6.0;
+                    7.0, 8.0, 9.0
+                ),
                 expected: 0.0,
             },
             Case {
-                matrix: Matrix::new(
-                    3,
-                    3,
-                    vec![
-                        -3.0, 2.0, -5.0, // row
-                        -1.0, 0.0, -2.0, // row
-                        3.0, -4.0, 1.0, // row
-                    ],
-                )
-                .expect("-ve"),
+                matrix: matrix!(
+                    rows: 3,
+                    cols: 3,
+                    -3.0, 2.0, -5.0;
+                    -1.0, 0.0, -2.0;
+                    3.0, -4.0, 1.0
+                ),
                 expected: -6.0,
             },
             Case {
-                matrix: Matrix::new(
-                    3,
-                    3,
-                    vec![
-                        6.0, 1.0, 1.0, // row
-                        4.0, -2.0, 5.0, // row
-                        2.0, 8.0, 7.0, // row
-                    ],
-                )
-                .expect("complex"),
+                matrix: matrix!(
+                    rows: 3,
+                    cols: 3,
+                    6.0, 1.0, 1.0;
+                    4.0, -2.0, 5.0;
+                    2.0, 8.0, 7.0
+                ),
                 expected: -306.0,
             },
             Case {
-                matrix: Matrix::new(
-                    4,
-                    4,
-                    vec![
-                        1.0, 2.0, 3.0, 4.0, //row
-                        5.0, 6.0, 7.0, 8.0, // row
-                        9.0, 10.0, 11.0, 12.0, // row
-                        2.0, 6.0, 4.0, 8.0, // row
-                    ],
-                )
-                .expect("complex"),
+                matrix: matrix!(
+                    rows: 4,
+                    cols: 4,
+                    1.0, 2.0, 3.0, 4.0;
+                    5.0, 6.0, 7.0, 8.0;
+                    9.0, 10.0, 11.0, 12.0;
+                    2.0, 6.0, 4.0, 8.0
+                ),
                 expected: 0.0,
             },
             Case {
-                matrix: Matrix::new(
-                    4,
-                    4,
-                    vec![
-                        3.0, 2.0, 0.0, 1.0, // row
-                        4.0, 0.0, 1.0, 2.0, // row
-                        3.0, 0.0, 2.0, 1.0, // row
-                        9.0, 2.0, 3.0, 1.0, // row
-                    ],
-                )
-                .expect("complex"),
+                matrix: matrix!(
+                    rows: 4,
+                    cols: 4,
+                    3.0, 2.0, 0.0, 1.0;
+                    4.0, 0.0, 1.0, 2.0;
+                    3.0, 0.0, 2.0, 1.0;
+                    9.0, 2.0, 3.0, 1.0
+                ),
                 expected: 24.0,
             },
         ];
