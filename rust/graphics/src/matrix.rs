@@ -9,6 +9,7 @@ pub struct Matrix {
 pub enum MatrixError {
     IncorrectDataSize,
     IncompatibleDimensions,
+    SquareMatrixRequired,
     InvalidIndex(usize, usize),
 }
 
@@ -27,11 +28,30 @@ impl Matrix {
         })
     }
 
+    pub fn identity(rows: usize) -> Self {
+        let mut m = Matrix::square_zeros(rows);
+
+        for i in 0..rows {
+            let index = m.get_index_ok(i, i);
+            m.data[index] = 1.0;
+        }
+
+        return m;
+    }
+
     pub fn zeros(rows: usize, columns: usize) -> Self {
         return Matrix {
             rows,
             columns,
             data: vec![0.0; rows * columns],
+        };
+    }
+
+    pub fn square_zeros(dimension: usize) -> Self {
+        return Matrix {
+            rows: dimension,
+            columns: dimension,
+            data: vec![0.0; dimension * dimension],
         };
     }
 
@@ -101,6 +121,44 @@ impl Matrix {
 
         Ok(result)
     }
+
+    pub fn determinant(&self) -> Result<f64, MatrixError> {
+        if self.rows != self.columns {
+            return Err(MatrixError::SquareMatrixRequired);
+        }
+
+        if self.rows == 2 {
+            return Ok(self.data[0] * self.data[3] - self.data[1] * self.data[2]);
+        }
+
+        let mut result = 0.0;
+
+        for column_mask in 0..self.columns {
+            let coeff_idx = self.get_index_ok(0, column_mask);
+            let coeff_sign = if column_mask % 2 == 0 { 1.0 } else { -1.0 };
+            let coeff = coeff_sign * self.data[coeff_idx];
+
+            let mut sub_m = Matrix::square_zeros(self.rows - 1);
+            for row in 1..self.rows {
+                let mut column_index = 0;
+                for column in 0..self.columns {
+                    if column == column_mask {
+                        continue;
+                    }
+
+                    let cell_value = self.get(row, column).expect("get to copy");
+                    sub_m
+                        .set(row - 1, column_index, cell_value)
+                        .expect("set sub matrix item");
+                    column_index += 1;
+                }
+            }
+
+            result += coeff * sub_m.determinant().expect("Should know its square");
+        }
+
+        Ok(result)
+    }
 }
 
 #[cfg(test)]
@@ -116,6 +174,19 @@ mod tests {
         let m = Matrix::new(2, 2, data);
 
         assert!(m.is_ok());
+    }
+
+    #[test]
+    fn identity() {
+        let m = Matrix::identity(3);
+
+        assert_eq!(m.get(0, 0).unwrap(), 1.0);
+        assert_eq!(m.get(1, 1).unwrap(), 1.0);
+        assert_eq!(m.get(2, 2).unwrap(), 1.0);
+
+        assert_eq!(m.get(0, 1).unwrap(), 0.0);
+        assert_eq!(m.get(1, 2).unwrap(), 0.0);
+        assert_eq!(m.get(2, 0).unwrap(), 0.0);
     }
 
     #[test]
@@ -194,5 +265,125 @@ mod tests {
         assert_eq!(result.get(0, 1).expect("r00"), 64.0);
         assert_eq!(result.get(1, 0).expect("r00"), 139.0);
         assert_eq!(result.get(1, 1).expect("r00"), 154.0);
+    }
+
+    #[test]
+    fn multiplication_error() {
+        let m1 = Matrix::zeros(3, 2);
+        let m2 = Matrix::zeros(3, 2);
+
+        m1.multiply(&m2).expect_err("Should be incompatible");
+    }
+
+    #[test]
+    fn determinant() {
+        struct Case {
+            matrix: Matrix,
+            expected: f64,
+        }
+        let cases = vec![
+            Case {
+                matrix: Matrix::new(
+                    2,
+                    2,
+                    vec![
+                        1.0, 2.0, // row
+                        3.0, 4.0, // row
+                    ],
+                )
+                .expect("m"),
+                expected: -2.0,
+            },
+            Case {
+                matrix: Matrix::identity(2),
+                expected: 1.0,
+            },
+            Case {
+                matrix: Matrix::identity(3),
+                expected: 1.0,
+            },
+            Case {
+                matrix: Matrix::new(
+                    3,
+                    3,
+                    vec![
+                        1.0, 2.0, 3.0, // row
+                        4.0, 5.0, 6.0, // row
+                        7.0, 8.0, 9.0, // row
+                    ],
+                )
+                .expect("3x3"),
+                expected: 0.0,
+            },
+            Case {
+                matrix: Matrix::new(
+                    3,
+                    3,
+                    vec![
+                        -3.0, 2.0, -5.0, // row
+                        -1.0, 0.0, -2.0, // row
+                        3.0, -4.0, 1.0, // row
+                    ],
+                )
+                .expect("-ve"),
+                expected: -6.0,
+            },
+            Case {
+                matrix: Matrix::new(
+                    3,
+                    3,
+                    vec![
+                        6.0, 1.0, 1.0, // row
+                        4.0, -2.0, 5.0, // row
+                        2.0, 8.0, 7.0, // row
+                    ],
+                )
+                .expect("complex"),
+                expected: -306.0,
+            },
+            Case {
+                matrix: Matrix::new(
+                    4,
+                    4,
+                    vec![
+                        1.0, 2.0, 3.0, 4.0, //row
+                        5.0, 6.0, 7.0, 8.0, // row
+                        9.0, 10.0, 11.0, 12.0, // row
+                        2.0, 6.0, 4.0, 8.0, // row
+                    ],
+                )
+                .expect("complex"),
+                expected: 0.0,
+            },
+            Case {
+                matrix: Matrix::new(
+                    4,
+                    4,
+                    vec![
+                        3.0, 2.0, 0.0, 1.0, // row
+                        4.0, 0.0, 1.0, 2.0, // row
+                        3.0, 0.0, 2.0, 1.0, // row
+                        9.0, 2.0, 3.0, 1.0, // row
+                    ],
+                )
+                .expect("complex"),
+                expected: 24.0,
+            },
+        ];
+
+        for (i, case) in cases.iter().enumerate() {
+            let result = case.matrix.determinant().expect("should calc");
+
+            assert_eq!(result, case.expected, "case {} failed", i);
+        }
+    }
+
+    #[test]
+    fn determinant_error() {
+        let m1 = Matrix::zeros(2, 3);
+
+        let result = m1.determinant().expect_err("Only works for square");
+
+        assert_eq!(result, MatrixError::SquareMatrixRequired);
     }
 }
