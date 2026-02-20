@@ -1,4 +1,4 @@
-use graphics::matrix::Matrix;
+use maths::matrix::Matrix;
 
 fn main() {
     println!("Hello, world!");

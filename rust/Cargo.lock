@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "graphics"
+name = "maths"
 version = "0.1.0"
 
 [[package]]
