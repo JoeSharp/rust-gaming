@@ -1,8 +1,18 @@
+use crate::approx_eq::ApproxEq;
+
 #[derive(PartialEq, Debug)]
 pub struct Vector3 {
     x: f64,
     y: f64,
     z: f64,
+}
+
+impl ApproxEq for Vector3 {
+    fn approx_eq(&self, other: &Vector3, eps: f64) -> bool {
+        self.x.approx_eq(&other.x, eps)
+            && self.y.approx_eq(&other.y, eps)
+            && self.z.approx_eq(&other.z, eps)
+    }
 }
 
 impl Vector3 {
@@ -100,7 +110,7 @@ mod tests {
         for case in cases {
             let result = case.a.add(&case.b);
 
-            approx_vec3!(result, case.expected);
+            assert!(result.approx_eq_default(&case.expected));
         }
     }
 
@@ -122,7 +132,7 @@ mod tests {
         for case in cases {
             let result = case.a.subtract(&case.b);
 
-            approx_vec3!(result, case.expected);
+            assert!(result.approx_eq_default(&case.expected));
         }
     }
 
@@ -143,7 +153,7 @@ mod tests {
         for case in cases {
             let result = case.input.multiply(case.multiplier);
 
-            approx_vec3!(result, case.expected);
+            assert!(result.approx_eq_default(&case.expected));
         }
     }
 
@@ -165,7 +175,7 @@ mod tests {
         for case in cases {
             let result = case.a.dot_product(&case.b);
 
-            approx_eq!(result, case.expected);
+            assert!(result.approx_eq_default(&case.expected));
         }
     }
 
@@ -180,7 +190,7 @@ mod tests {
         for case in cases {
             let result = case.a.angle_between(&case.b);
 
-            approx_eq!(result, case.expected, 0.001);
+            assert!(result.approx_eq(&case.expected, 0.001));
         }
     }
 
@@ -202,7 +212,7 @@ mod tests {
         for case in cases {
             let result = case.a.cross_product(&case.b);
 
-            approx_vec3!(result, case.expected);
+            assert!(result.approx_eq_default(&case.expected));
         }
     }
 }
