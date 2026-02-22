@@ -1,3 +1,4 @@
+use crate::approx_eq::ApproxEq;
 #[allow(unused_imports)]
 use crate::matrix;
 
@@ -14,6 +15,22 @@ pub enum MatrixError {
     IncompatibleDimensions,
     SquareMatrixRequired,
     InvalidIndex(usize, usize),
+}
+
+impl ApproxEq for Matrix {
+    fn approx_eq(&self, other: &Self, eps: f64) -> bool {
+        if self.rows != other.rows {
+            return false;
+        }
+        if self.columns != other.columns {
+            return false;
+        }
+
+        self.data
+            .iter()
+            .zip(other.data.iter())
+            .all(|(a, b)| a.approx_eq(b, eps))
+    }
 }
 
 impl Matrix {

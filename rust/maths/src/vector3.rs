@@ -1,4 +1,5 @@
 use crate::approx_eq::ApproxEq;
+use crate::matrix::Matrix;
 
 #[derive(PartialEq, Debug)]
 pub struct Vector3 {
@@ -69,11 +70,32 @@ impl Vector3 {
     }
 
     pub fn cross_product(&self, other: &Vector3) -> Vector3 {
-        Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }
+        let x = matrix!(
+            rows: 2,
+            cols: 2,
+            self.y, self.z,
+            other.y, other.z,
+        )
+        .determinant()
+        .expect("det x");
+        let y = -1.0
+            * matrix!(
+                rows: 2,
+                cols: 2,
+                self.x, self.z,
+                other.x, other.z,
+            )
+            .determinant()
+            .expect("det y");
+        let z = matrix!(
+            rows: 2,
+            cols: 2,
+            self.x, self.y,
+            other.x, other.y,
+        )
+        .determinant()
+        .expect("det z");
+        Vector3 { x, y, z }
     }
 }
 
@@ -194,7 +216,7 @@ mod tests {
         }
     }
 
-    //#[test]
+    #[test]
     fn cross_product() {
         let cases: Vec<VectorResultCase> = vec![
             VectorResultCase {
@@ -204,7 +226,7 @@ mod tests {
             },
             VectorResultCase {
                 a: Vector3::new(2, -1, 3),
-                b: Vector3::new(0, 4, -1),
+                b: Vector3::new(0, 4, -2),
                 expected: Vector3::new(-10, 4, 8),
             },
         ];
