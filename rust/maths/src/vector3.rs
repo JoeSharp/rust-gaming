@@ -6,6 +6,14 @@ pub struct Vector3 {
 }
 
 impl Vector3 {
+    pub fn new<X: Into<f64>, Y: Into<f64>, Z: Into<f64>>(x: X, y: Y, z: Z) -> Vector3 {
+        Vector3 {
+            x: x.into(),
+            y: y.into(),
+            z: z.into(),
+        }
+    }
+
     pub fn add(&self, other: &Vector3) -> Vector3 {
         Vector3 {
             x: self.x + other.x,
@@ -49,6 +57,14 @@ impl Vector3 {
         let cos_theta = dot / mags;
         cos_theta.acos()
     }
+
+    pub fn cross_product(&self, other: &Vector3) -> Vector3 {
+        Vector3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -70,38 +86,14 @@ mod tests {
     fn addition() {
         let cases: Vec<VectorResultCase> = vec![
             VectorResultCase {
-                a: Vector3 {
-                    x: 3.0,
-                    y: 4.0,
-                    z: 3.2,
-                },
-                b: Vector3 {
-                    x: 7.0,
-                    y: 2.0,
-                    z: 9.4,
-                },
-                expected: Vector3 {
-                    x: 10.0,
-                    y: 6.0,
-                    z: 12.6,
-                },
+                a: Vector3::new(3, 4, 3.2),
+                b: Vector3::new(7, 2, 9.4),
+                expected: Vector3::new(10, 6, 12.6),
             },
             VectorResultCase {
-                a: Vector3 {
-                    x: -2.0,
-                    y: 15.0,
-                    z: -2.5,
-                },
-                b: Vector3 {
-                    x: 9.0,
-                    y: 2.1,
-                    z: 4.0,
-                },
-                expected: Vector3 {
-                    x: 7.0,
-                    y: 17.1,
-                    z: 1.5,
-                },
+                a: Vector3::new(-2, 15, -2.5),
+                b: Vector3::new(9, 2.1, 4),
+                expected: Vector3::new(7, 17.1, 1.5),
             },
         ];
 
@@ -116,38 +108,14 @@ mod tests {
     fn subtraction() {
         let cases: Vec<VectorResultCase> = vec![
             VectorResultCase {
-                a: Vector3 {
-                    x: 3.0,
-                    y: 4.0,
-                    z: 3.2,
-                },
-                b: Vector3 {
-                    x: 7.0,
-                    y: 2.0,
-                    z: 1.3,
-                },
-                expected: Vector3 {
-                    x: -4.0,
-                    y: 2.0,
-                    z: 1.9,
-                },
+                a: Vector3::new(3, 4, 3.2),
+                b: Vector3::new(7, 2, 1.3),
+                expected: Vector3::new(-4, 2, 1.9),
             },
             VectorResultCase {
-                a: Vector3 {
-                    x: -2.0,
-                    y: 15.0,
-                    z: -7.0,
-                },
-                b: Vector3 {
-                    x: 9.0,
-                    y: 2.1,
-                    z: -4.0,
-                },
-                expected: Vector3 {
-                    x: -11.0,
-                    y: 12.9,
-                    z: -3.0,
-                },
+                a: Vector3::new(-2, 15, -7),
+                b: Vector3::new(9, 2.1, -4),
+                expected: Vector3::new(-11, 12.9, -3),
             },
         ];
 
@@ -167,17 +135,9 @@ mod tests {
         }
 
         let cases: Vec<MultCase> = vec![MultCase {
-            input: Vector3 {
-                x: 5.4,
-                y: 3.2,
-                z: -4.1,
-            },
+            input: Vector3::new(5.4, 3.2, -4.1),
             multiplier: 4.0,
-            expected: Vector3 {
-                x: 21.6,
-                y: 12.8,
-                z: -16.4,
-            },
+            expected: Vector3::new(21.6, 12.8, -16.4),
         }];
 
         for case in cases {
@@ -191,29 +151,13 @@ mod tests {
     fn dot_product() {
         let cases: Vec<ScalarResultCase> = vec![
             ScalarResultCase {
-                a: Vector3 {
-                    x: 1.0,
-                    y: 0.0,
-                    z: 0.0,
-                },
-                b: Vector3 {
-                    x: 0.0,
-                    y: 5.0,
-                    z: 0.0,
-                },
+                a: Vector3::new(1, 0, 0),
+                b: Vector3::new(0, 5, 0),
                 expected: 0.0,
             },
             ScalarResultCase {
-                a: Vector3 {
-                    x: 1.0,
-                    y: -2.0,
-                    z: 3.0,
-                },
-                b: Vector3 {
-                    x: 4.0,
-                    y: 0.5,
-                    z: -1.0,
-                },
+                a: Vector3::new(1, -2, 3),
+                b: Vector3::new(4, 0.5, -1),
                 expected: 0.0,
             },
         ];
@@ -228,16 +172,8 @@ mod tests {
     #[test]
     fn angle_between() {
         let cases: Vec<ScalarResultCase> = vec![ScalarResultCase {
-            a: Vector3 {
-                x: 2.0,
-                y: 2.0,
-                z: -1.0,
-            },
-            b: Vector3 {
-                x: 5.0,
-                y: -3.0,
-                z: 2.0,
-            },
+            a: Vector3::new(2, 2, -1),
+            b: Vector3::new(5, -3, 2),
             expected: 0.108_f64.acos(),
         }];
 
@@ -245,6 +181,28 @@ mod tests {
             let result = case.a.angle_between(&case.b);
 
             approx_eq!(result, case.expected, 0.001);
+        }
+    }
+
+    //#[test]
+    fn cross_product() {
+        let cases: Vec<VectorResultCase> = vec![
+            VectorResultCase {
+                a: Vector3::new(1, 0, 0),
+                b: Vector3::new(0, 1, 0),
+                expected: Vector3::new(0, 0, 1),
+            },
+            VectorResultCase {
+                a: Vector3::new(2, -1, 3),
+                b: Vector3::new(0, 4, -1),
+                expected: Vector3::new(-10, 4, 8),
+            },
+        ];
+
+        for case in cases {
+            let result = case.a.cross_product(&case.b);
+
+            approx_vec3!(result, case.expected);
         }
     }
 }

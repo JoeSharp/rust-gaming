@@ -5,6 +5,12 @@ pub struct Vector2 {
 }
 
 impl Vector2 {
+    pub fn new<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Vector2 {
+        Vector2 {
+            x: x.into(),
+            y: y.into(),
+        }
+    }
     pub fn add(&self, other: &Vector2) -> Vector2 {
         Vector2 {
             x: self.x + other.x,
@@ -67,14 +73,14 @@ mod tests {
     fn addition() {
         let cases: Vec<VectorResultCase> = vec![
             VectorResultCase {
-                a: Vector2 { x: 3.0, y: 4.0 },
-                b: Vector2 { x: 7.0, y: 2.0 },
-                expected: Vector2 { x: 10.0, y: 6.0 },
+                a: Vector2::new(3, 4),
+                b: Vector2::new(7, 2),
+                expected: Vector2::new(10, 6),
             },
             VectorResultCase {
-                a: Vector2 { x: -2.0, y: 15.0 },
-                b: Vector2 { x: 9.0, y: 2.1 },
-                expected: Vector2 { x: 7.0, y: 17.1 },
+                a: Vector2::new(-2, 15),
+                b: Vector2::new(9, 2.1),
+                expected: Vector2::new(7, 17.1),
             },
         ];
 
@@ -89,14 +95,14 @@ mod tests {
     fn subtraction() {
         let cases: Vec<VectorResultCase> = vec![
             VectorResultCase {
-                a: Vector2 { x: 3.0, y: 4.0 },
-                b: Vector2 { x: 7.0, y: 2.0 },
-                expected: Vector2 { x: -4.0, y: 2.0 },
+                a: Vector2::new(3, 4),
+                b: Vector2::new(7, 2),
+                expected: Vector2::new(-4, 2),
             },
             VectorResultCase {
-                a: Vector2 { x: -2.0, y: 15.0 },
-                b: Vector2 { x: 9.0, y: 2.1 },
-                expected: Vector2 { x: -11.0, y: 12.9 },
+                a: Vector2::new(-2, 15),
+                b: Vector2::new(9, 2.1),
+                expected: Vector2::new(-11, 12.9),
             },
         ];
 
@@ -116,9 +122,9 @@ mod tests {
         }
 
         let cases: Vec<MultCase> = vec![MultCase {
-            input: Vector2 { x: 5.4, y: 3.2 },
+            input: Vector2::new(5.4, 3.2),
             multiplier: 4.0,
-            expected: Vector2 { x: 21.6, y: 12.8 },
+            expected: Vector2::new(21.6, 12.8),
         }];
 
         for case in cases {
@@ -132,13 +138,13 @@ mod tests {
     fn dot_product() {
         let cases: Vec<ScalarResultCase> = vec![
             ScalarResultCase {
-                a: Vector2 { x: 2.0, y: 7.0 },
-                b: Vector2 { x: 8.5, y: 3.1 },
+                a: Vector2::new(2, 7),
+                b: Vector2::new(8.5, 3.1),
                 expected: 38.7,
             },
             ScalarResultCase {
-                a: Vector2 { x: 2.0, y: 4.0 },
-                b: Vector2 { x: 1.0, y: -3.0 },
+                a: Vector2::new(2, 4),
+                b: Vector2::new(1, -3),
                 expected: -10.0,
             },
         ];
@@ -153,8 +159,8 @@ mod tests {
     #[test]
     fn angle_between() {
         let cases: Vec<ScalarResultCase> = vec![ScalarResultCase {
-            a: Vector2 { x: 1.0, y: 0.0 },
-            b: Vector2 { x: 0.0, y: 1.0 },
+            a: Vector2::new(1, 0),
+            b: Vector2::new(0, 1),
             expected: PI / 2.0,
         }];
 
