@@ -1,9 +1,16 @@
 use crate::approx_eq::ApproxEq;
+use std::fmt;
 
 #[derive(PartialEq, Debug)]
 pub struct Vector2 {
     x: f64,
     y: f64,
+}
+
+impl fmt::Display for Vector2 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
 }
 
 impl ApproxEq for Vector2 {
@@ -57,6 +64,11 @@ impl Vector2 {
 
         let cos_theta = dot / mags;
         cos_theta.acos()
+    }
+
+    pub fn normalize(&self) -> Vector2 {
+        let mag = self.magnitude();
+        Vector2::new(self.x / mag, self.y / mag)
     }
 }
 
@@ -175,6 +187,34 @@ mod tests {
         for case in cases {
             let result = case.a.angle_between(&case.b);
 
+            assert!(result.approx_eq_default(&case.expected));
+        }
+    }
+
+    #[test]
+    fn normalize() {
+        struct NormalizeCase {
+            input: Vector2,
+            expected: Vector2,
+        }
+
+        let cases: Vec<NormalizeCase> = vec![
+            NormalizeCase {
+                input: Vector2::new(3, 4),
+                expected: Vector2::new(0.6, 0.8),
+            },
+            NormalizeCase {
+                input: Vector2::new(-8, 6),
+                expected: Vector2::new(-0.8, 0.6),
+            },
+            NormalizeCase {
+                input: Vector2::new(1, 1),
+                expected: Vector2::new(1.0 / 2.0_f32.sqrt(), 1.0 / 2.0_f32.sqrt()),
+            },
+        ];
+
+        for case in cases {
+            let result = case.input.normalize();
             assert!(result.approx_eq_default(&case.expected));
         }
     }

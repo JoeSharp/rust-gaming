@@ -1,11 +1,18 @@
 use crate::approx_eq::ApproxEq;
 use crate::matrix::Matrix;
+use std::fmt;
 
 #[derive(PartialEq, Debug)]
 pub struct Vector3 {
     x: f64,
     y: f64,
     z: f64,
+}
+
+impl fmt::Display for Vector3 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
+    }
 }
 
 impl ApproxEq for Vector3 {
@@ -67,6 +74,12 @@ impl Vector3 {
 
         let cos_theta = dot / mags;
         cos_theta.acos()
+    }
+
+    pub fn normalize(&self) -> Vector3 {
+        let mag = self.magnitude();
+        println!("Mag {}", mag);
+        Vector3::new(self.x / mag, self.y / mag, self.z / mag)
     }
 
     pub fn cross_product(&self, other: &Vector3) -> Vector3 {
@@ -234,6 +247,30 @@ mod tests {
         for case in cases {
             let result = case.a.cross_product(&case.b);
 
+            assert!(result.approx_eq_default(&case.expected));
+        }
+    }
+
+    #[test]
+    fn normalize() {
+        struct NormalizeCase {
+            input: Vector3,
+            expected: Vector3,
+        }
+
+        let cases: Vec<NormalizeCase> = vec![
+            NormalizeCase {
+                input: Vector3::new(1, 2, 2),
+                expected: Vector3::new(1.0 / 3.0, 2.0 / 3.0, 2.0 / 3.0),
+            },
+            NormalizeCase {
+                input: Vector3::new(2, -3, 6),
+                expected: Vector3::new(2.0 / 7.0, -3.0 / 7.0, 6.0 / 7.0),
+            },
+        ];
+
+        for case in cases {
+            let result = case.input.normalize();
             assert!(result.approx_eq_default(&case.expected));
         }
     }
