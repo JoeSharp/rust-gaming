@@ -1,3 +1,4 @@
+#[derive(Hash, PartialEq, Eq, Debug)]
 pub enum Element {
     // Period 1
     H,
