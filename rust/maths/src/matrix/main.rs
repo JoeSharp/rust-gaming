@@ -42,23 +42,6 @@ impl Matrix {
         };
     }
 
-    // Joe - make this ... more private?
-    pub fn get_index(&self, row: usize, column: usize) -> Result<usize, MatrixError> {
-        if row >= self.rows {
-            return Err(MatrixError::InvalidIndex(row, column));
-        }
-        if column >= self.columns {
-            return Err(MatrixError::InvalidIndex(row, column));
-        }
-
-        Ok(self.get_index_ok(row, column))
-    }
-
-    // Joe - make this ... more private?
-    pub fn get_index_ok(&self, row: usize, column: usize) -> usize {
-        column + (row * self.columns)
-    }
-
     pub fn get(&self, row: usize, column: usize) -> Result<f64, MatrixError> {
         return match self.get_index(row, column) {
             Ok(v) => Ok(self.data[v]),
@@ -79,6 +62,7 @@ impl Matrix {
 
 #[cfg(test)]
 mod tests {
+    use crate::matrix;
 
     #[test]
     fn create_valid_matrix() {

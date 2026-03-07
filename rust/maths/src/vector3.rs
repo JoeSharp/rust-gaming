@@ -1,4 +1,5 @@
 use crate::approx_eq::ApproxEq;
+use crate::matrix;
 use crate::matrix::Matrix;
 use std::fmt;
 

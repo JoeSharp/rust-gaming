@@ -78,6 +78,7 @@ impl Matrix {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::matrix;
 
     #[test]
     fn check_addition() {

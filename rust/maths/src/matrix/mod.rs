@@ -4,6 +4,9 @@ mod display;
 mod main;
 mod operations;
 
+#[macro_use]
+mod matrix_macro;
+
 #[derive(PartialEq, Debug)]
 pub struct Matrix {
     pub rows: usize,
@@ -17,4 +20,20 @@ pub enum MatrixError {
     IncompatibleDimensions,
     SquareMatrixRequired,
     InvalidIndex(usize, usize),
+}
+impl Matrix {
+    fn get_index(&self, row: usize, column: usize) -> Result<usize, MatrixError> {
+        if row >= self.rows {
+            return Err(MatrixError::InvalidIndex(row, column));
+        }
+        if column >= self.columns {
+            return Err(MatrixError::InvalidIndex(row, column));
+        }
+
+        Ok(self.get_index_ok(row, column))
+    }
+
+    fn get_index_ok(&self, row: usize, column: usize) -> usize {
+        column + (row * self.columns)
+    }
 }

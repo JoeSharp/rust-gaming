@@ -4,7 +4,6 @@ use std::fmt::Display;
 
 impl Display for Matrix {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "rows: {}, columns: {}", self.rows, self.columns)?;
         for r in 0..self.rows {
             write!(f, "[")?;
 
