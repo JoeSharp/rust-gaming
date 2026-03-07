@@ -11,12 +11,8 @@ pub enum ParseError {
     InvalidValue,
 }
 
-pub trait CellValue: TryFrom<char> + Into<char> + PartialEq + Copy + Hash + Display {}
-
-impl<T> CellValue for T where T: TryFrom<char> + Into<char> + PartialEq + Copy + Hash + Display {}
-
 #[derive(Eq, Hash, Debug)]
-pub struct Cell<T: CellValue> {
+pub struct Cell<T> {
     id: u32,
     row: usize,
     column: usize,
@@ -25,7 +21,7 @@ pub struct Cell<T: CellValue> {
 
 impl<T> fmt::Display for Cell<T>
 where
-    T: CellValue,
+    T: Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.value)
@@ -34,7 +30,7 @@ where
 
 impl<T> Cell<T>
 where
-    T: CellValue,
+    T: Copy,
 {
     pub fn id(&self) -> u32 {
         self.id
@@ -61,7 +57,7 @@ where
 
 impl<T> PartialEq for Cell<T>
 where
-    T: CellValue,
+    T: PartialEq,
 {
     fn eq(&self, b: &Cell<T>) -> bool {
         self.row == b.row && self.column == b.column && self.value == b.value
@@ -69,13 +65,13 @@ where
 }
 
 #[derive(Debug, Hash, Eq)]
-pub struct Arr2d<T: CellValue> {
+pub struct Arr2d<T> {
     contents: Vec<Vec<Cell<T>>>,
 }
 
 impl<T> fmt::Display for Arr2d<T>
 where
-    T: CellValue,
+    T: Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for row in &self.contents {
@@ -91,66 +87,11 @@ where
     }
 }
 
-impl<T> Arr2d<T>
-where
-    T: CellValue,
-{
+impl<T> Arr2d<T> {
     pub fn new() -> Arr2d<T> {
         Arr2d {
             contents: Vec::new(),
         }
-    }
-
-    pub fn from_contents(contents: Vec<Vec<T>>) -> Arr2d<T> {
-        let mut id = 0;
-
-        Arr2d {
-            contents: contents
-                .iter()
-                .enumerate()
-                .map(|(row, row_c)| {
-                    row_c
-                        .iter()
-                        .enumerate()
-                        .map(|(column, &value)| {
-                            id += 1;
-                            return Cell {
-                                id,
-                                row,
-                                column,
-                                value,
-                            };
-                        })
-                        .collect()
-                })
-                .collect(),
-        }
-    }
-
-    pub fn from_lines<'a>(lines: impl Iterator<Item = &'a str>) -> Result<Arr2d<T>, ParseError> {
-        let mut rows: Vec<Vec<T>> = Vec::new();
-
-        for row in lines {
-            let mut cells: Vec<T> = Vec::new();
-            for cell in row.trim().chars() {
-                match <T>::try_from(cell) {
-                    Ok(v) => cells.push(v),
-                    Err(_) => return Err(ParseError::InvalidCharacter),
-                }
-            }
-            rows.push(cells);
-        }
-
-        Ok(Arr2d::from_contents(rows))
-    }
-
-    pub fn from_str(as_str: &str) -> Result<Arr2d<T>, ParseError> {
-        Self::from_lines(
-            as_str
-                .split("\n")
-                .map(|line| line.trim())
-                .filter(|line| !line.is_empty()),
-        )
     }
 
     pub fn get_cell(&self, row: usize, column: usize) -> Result<&Cell<T>, &str> {
@@ -183,7 +124,125 @@ where
             }
         })
     }
+}
 
+impl<T> Arr2d<T>
+where
+    T: Copy,
+{
+    pub fn expand(&self, width: usize, height: usize, filler: T) -> Arr2d<T> {
+        let mut contents: Vec<Vec<T>> = self
+            .contents
+            .iter()
+            .map(|v| v.iter().map(|c| c.value).collect())
+            .collect();
+
+        for row in contents.iter_mut() {
+            while row.len() < width {
+                row.push(filler);
+            }
+            while row.len() > width {
+                row.pop();
+            }
+        }
+
+        while contents.len() < height {
+            contents.push(vec![filler; width]);
+        }
+        while contents.len() > height {
+            contents.pop();
+        }
+
+        Arr2d::from_contents(contents)
+    }
+
+    pub fn rows(&self) -> usize {
+        self.contents.len()
+    }
+
+    pub fn columns(&self, row: usize) -> usize {
+        self.contents[row].len()
+    }
+
+    pub fn get(&self, row: usize, col: usize) -> &T {
+        &self.contents[row][col].value
+    }
+
+    pub fn set(&mut self, row: usize, col: usize, value: T) {
+        self.contents[row][col].value = value;
+    }
+    pub fn from_contents(contents: Vec<Vec<T>>) -> Arr2d<T> {
+        let mut id = 0;
+
+        Arr2d {
+            contents: contents
+                .iter()
+                .enumerate()
+                .map(|(row, row_c)| {
+                    row_c
+                        .iter()
+                        .enumerate()
+                        .map(|(column, &value)| {
+                            id += 1;
+                            return Cell {
+                                id,
+                                row,
+                                column,
+                                value,
+                            };
+                        })
+                        .collect()
+                })
+                .collect(),
+        }
+    }
+}
+
+impl<T> Arr2d<T>
+where
+    T: Copy,
+    T: TryFrom<char>,
+{
+    pub fn from_lines<'a>(lines: impl Iterator<Item = &'a str>) -> Result<Arr2d<T>, ParseError> {
+        let mut rows: Vec<Vec<T>> = Vec::new();
+
+        for row in lines {
+            let mut cells: Vec<T> = Vec::new();
+            for cell in row.trim().chars() {
+                match <T>::try_from(cell) {
+                    Ok(v) => cells.push(v),
+                    Err(_) => return Err(ParseError::InvalidCharacter),
+                }
+            }
+            rows.push(cells);
+        }
+
+        Ok(Arr2d::from_contents(rows))
+    }
+
+    pub fn from_str(as_str: &str) -> Result<Arr2d<T>, ParseError> {
+        Self::from_lines(
+            as_str
+                .split("\n")
+                .map(|line| line.trim())
+                .filter(|line| !line.is_empty()),
+        )
+    }
+}
+
+impl<T> PartialEq for Arr2d<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.contents == other.contents
+    }
+}
+
+impl<T> Arr2d<T>
+where
+    T: PartialEq,
+{
     pub fn get_perimeter(
         &self,
         row: usize,
@@ -229,49 +288,13 @@ where
             None => None,
         }))
     }
+}
 
-    pub fn expand(&self, width: usize, height: usize, filler: T) -> Arr2d<T> {
-        let mut contents: Vec<Vec<T>> = self
-            .contents
-            .iter()
-            .map(|v| v.iter().map(|c| c.value).collect())
-            .collect();
-
-        for row in contents.iter_mut() {
-            while row.len() < width {
-                row.push(filler);
-            }
-            while row.len() > width {
-                row.pop();
-            }
-        }
-
-        while contents.len() < height {
-            contents.push(vec![filler; width]);
-        }
-        while contents.len() > height {
-            contents.pop();
-        }
-
-        Arr2d::from_contents(contents)
-    }
-
-    pub fn rows(&self) -> usize {
-        self.contents.len()
-    }
-
-    pub fn columns(&self, row: usize) -> usize {
-        self.contents[row].len()
-    }
-
-    pub fn get(&self, row: usize, col: usize) -> &T {
-        &self.contents[row][col].value
-    }
-
-    pub fn set(&mut self, row: usize, col: usize, value: T) {
-        self.contents[row][col].value = value;
-    }
-
+impl<T> Arr2d<T>
+where
+    T: Copy,
+    T: Into<char>,
+{
     pub fn to_str(&self) -> String {
         let mut as_str = String::new();
         for row in &self.contents {
@@ -282,12 +305,6 @@ where
         }
 
         as_str
-    }
-}
-
-impl<T: CellValue> PartialEq for Arr2d<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.contents == other.contents
     }
 }
 
