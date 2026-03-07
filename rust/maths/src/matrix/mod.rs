@@ -1,7 +1,7 @@
 mod approx_eq;
 mod classification;
+mod core;
 mod display;
-mod main;
 mod operations;
 
 #[macro_use]
