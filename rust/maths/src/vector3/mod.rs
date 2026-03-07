@@ -1,6 +1,6 @@
-use crate::approx_eq::ApproxEq;
-use crate::matrix;
-use crate::matrix::Matrix;
+use super::approx_eq::ApproxEq;
+use super::matrix;
+use super::matrix::Matrix;
 use std::fmt;
 
 #[derive(PartialEq, Debug)]

@@ -1,4 +1,4 @@
-use crate::approx_eq::ApproxEq;
+use super::approx_eq::ApproxEq;
 use std::fmt;
 
 #[derive(PartialEq, Debug)]
