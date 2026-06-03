@@ -9,7 +9,7 @@ use std::hash::Hash;
 use std::str::FromStr;
 
 #[derive(Hash, Eq, Debug, PartialEq, Copy, Clone)]
-enum GoPlayer {
+pub enum GoPlayer {
     White,
     Black,
 }
@@ -76,7 +76,7 @@ impl GoPlayer {
 }
 
 #[derive(Hash, Eq, Debug, PartialEq)]
-enum LastMove {
+pub enum LastMove {
     Ok,
     IllegalKo,
     IllegalSuicidal,
@@ -105,7 +105,7 @@ impl FromStr for LastMove {
 }
 
 #[derive(Debug, Clone, PartialEq, Copy, Hash, Eq)]
-enum GoCell {
+pub enum GoCell {
     White,
     WhitePending,
     Black,
