@@ -94,6 +94,30 @@ impl<T> Arr2d<T> {
         }
     }
 
+    pub fn with_size(rows: usize, columns: usize, default_value: T) -> Arr2d<T>
+    where
+        T: Copy,
+    {
+        let mut id = 0;
+        Arr2d {
+            contents: (0..rows)
+                .map(|r| {
+                    (0..columns)
+                        .map(|c| {
+                            id += 1;
+                            Cell {
+                                id,
+                                row: r,
+                                column: c,
+                                value: default_value,
+                            }
+                        })
+                        .collect()
+                })
+                .collect(),
+        }
+    }
+
     pub fn get_cell(&self, row: usize, column: usize) -> Result<&Cell<T>, &str> {
         match &self.contents.get(row) {
             Some(r) => match r.get(column) {
