@@ -53,7 +53,7 @@ impl GoBoard {
         GoBoard {
             whos_turn: GoPlayer::Black,
             last_move: LastMove::FirstMove,
-            captures: HashMap::new(),
+            captures: HashMap::from([(GoPlayer::Black, 0), (GoPlayer::White, 0)]),
             last_captures: VecDeque::new(),
             board: Arr2d::with_size(rows, columns, GoCell::Empty),
         }
@@ -230,6 +230,15 @@ mod tests {
                 vec![Empty, Empty, Empty],
             ])
         );
+    }
+
+    #[test]
+    fn create_with_size_then_display() {
+        // Given
+        let state = GoBoard::with_size(5, 3);
+
+        // When, Then
+        let _ = state.to_string();
     }
 
     #[test]
