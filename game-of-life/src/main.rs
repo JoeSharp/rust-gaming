@@ -8,7 +8,7 @@ use game_of_life::GameOfLife;
 use std::{io, thread, time::Duration};
 
 const FRAME_TIME: u64 = 100;
-const FRAME_COUNT: u64 = 10;
+const FRAME_COUNT: u64 = 100000;
 
 struct Config {
     basefile: String,

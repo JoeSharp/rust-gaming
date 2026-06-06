@@ -94,6 +94,10 @@ impl<T> Arr2d<T> {
         }
     }
 
+    pub fn get_size(&self) -> (usize, usize) {
+        (self.contents.len(), self.contents[0].len())
+    }
+
     pub fn with_size(rows: usize, columns: usize, default_value: T) -> Arr2d<T>
     where
         T: Copy,

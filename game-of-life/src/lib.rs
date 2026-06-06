@@ -52,6 +52,10 @@ impl GameOfLife {
     pub const ALIVE: char = 'x';
     pub const DEAD: char = '-';
 
+    pub fn get_contents(&self) -> &Arr2d<GolCell> {
+        return &self.contents[self.index];
+    }
+
     pub fn expand(&mut self, width: usize, height: usize) {
         for c in self.contents.iter_mut() {
             c.expand(width, height, GolCell::Dead);
