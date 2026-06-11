@@ -56,6 +56,14 @@ impl GameOfLife {
         return &self.contents[self.index];
     }
 
+    pub fn bring_to_life(&mut self, row: usize, column: usize) {
+        self.contents[self.index].set(row, column, GolCell::Alive);
+    }
+
+    pub fn get_size(&self) -> (usize, usize) {
+        return self.contents[self.index].get_size();
+    }
+
     pub fn expand(&mut self, width: usize, height: usize) {
         for c in self.contents.iter_mut() {
             c.expand(width, height, GolCell::Dead);
