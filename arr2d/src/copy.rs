@@ -18,6 +18,10 @@ where
         arr
     }
 
+    pub fn expand_in_place(&mut self, rows: usize, columns: usize, filler: T) {
+        *self = self.expand(rows, columns, filler);
+    }
+
     pub fn from_2d_array(contents_2d: Vec<Vec<T>>) -> Arr2d<T> {
         let rows = contents_2d.len();
         let columns = contents_2d.first().map_or(0, |r| r.len());

@@ -64,9 +64,9 @@ impl GameOfLife {
         return self.contents[self.index].get_size();
     }
 
-    pub fn expand(&mut self, width: usize, height: usize) {
+    pub fn expand_in_place(&mut self, width: usize, height: usize) {
         for c in self.contents.iter_mut() {
-            c.expand(width, height, GolCell::Dead);
+            c.expand_in_place(width, height, GolCell::Dead);
         }
     }
 
