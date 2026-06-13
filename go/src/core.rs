@@ -1,5 +1,6 @@
 use super::{GoBoard, GoBoardError, GoCell, GoPlayer, LastMove};
-use arr2d::{Arr2d, Cell};
+use arr2d::Arr2d;
+use arr2d::cell::Cell;
 use std::collections::{HashMap, HashSet, VecDeque};
 
 impl GoPlayer {
@@ -9,9 +10,7 @@ impl GoPlayer {
             GoPlayer::Black => GoPlayer::White,
         }
     }
-}
 
-impl GoPlayer {
     fn into_pending(self) -> GoCell {
         match self {
             GoPlayer::White => GoCell::WhitePending,
