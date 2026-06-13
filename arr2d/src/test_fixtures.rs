@@ -10,7 +10,9 @@ pub fn assert_cells(result: &Vec<&Cell<TestBool>>, expected: Vec<ExpectedCell>) 
     assert_eq!(
         expected.len(),
         result.len(),
-        "Results should only contain expected cells"
+        "Results should only contain expected cells.\nActual: {:#?}\nExpected: {:#?}",
+        result,
+        expected
     );
     for (ex_row, ex_column, value) in expected {
         let expected_cell = Cell::from(ex_row, ex_column, TestBool::from(value));

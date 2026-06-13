@@ -17,9 +17,9 @@ mod tests {
     #[test]
     fn test_eq() {
         let a: Arr2d<TestBool> =
-            Arr2d::from_contents(vec![vec![TestBool::from(true), TestBool::from(false)]]);
+            Arr2d::from_2d_array(vec![vec![TestBool::from(true), TestBool::from(false)]]);
         let b: Arr2d<TestBool> =
-            Arr2d::from_contents(vec![vec![TestBool::from(true), TestBool::from(false)]]);
+            Arr2d::from_2d_array(vec![vec![TestBool::from(true), TestBool::from(false)]]);
 
         assert_eq!(a, b);
     }
@@ -27,7 +27,7 @@ mod tests {
     #[test]
     fn test_neq() {
         let a: Arr2d<TestBool> =
-            Arr2d::from_contents(vec![vec![TestBool::from(true), TestBool::from(false)]]);
+            Arr2d::from_2d_array(vec![vec![TestBool::from(true), TestBool::from(false)]]);
         let b: Arr2d<TestBool> = Arr2d::new();
 
         assert_ne!(a, b);

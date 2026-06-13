@@ -1,9 +1,15 @@
 use crate::Arr2d;
 use crate::cell::Cell;
 
+pub fn get_coordinates(index: usize, columns: usize) -> (usize, usize) {
+    (index / columns, index % columns)
+}
+
 impl<T> Arr2d<T> {
     pub fn new() -> Arr2d<T> {
         Arr2d {
+            rows: 0,
+            columns: 0,
             contents: Vec::new(),
         }
     }
@@ -12,20 +18,40 @@ impl<T> Arr2d<T> {
         self.contents.len()
     }
 
-    pub fn columns(&self, row: usize) -> usize {
-        self.contents[row].len()
+    pub fn columns(&self) -> usize {
+        self.columns
     }
 
-    pub fn get(&self, row: usize, col: usize) -> &T {
-        self.contents[row][col].value_ref()
+    pub fn get(&self, row: usize, col: usize) -> Result<&T, &str> {
+        match self.get_index(row, col) {
+            Ok(index) => match self.contents.get(index) {
+                Some(cell) => Ok(cell.value_ref()),
+                None => Err("Invalid index"),
+            },
+            Err(_) => Err("Invalid index"),
+        }
     }
 
     pub fn set(&mut self, row: usize, col: usize, value: T) {
-        self.contents[row][col].set_value(value);
+        if let Ok(index) = self.get_index(row, col) {
+            if let Some(cell) = self.contents.get_mut(index) {
+                cell.set_value(value);
+            }
+        }
     }
 
     pub fn get_size(&self) -> (usize, usize) {
-        (self.contents.len(), self.contents[0].len())
+        (self.rows, self.columns)
+    }
+
+    fn get_index(&self, row: usize, col: usize) -> Result<usize, ()> {
+        if row >= self.rows {
+            return Err(());
+        }
+        if col >= self.columns {
+            return Err(());
+        }
+        Ok(col + row * self.columns)
     }
 
     pub fn with_size(rows: usize, columns: usize, default_value: T) -> Arr2d<T>
@@ -33,32 +59,34 @@ impl<T> Arr2d<T> {
         T: Copy,
     {
         let mut id = 0;
+        let mut contents = Vec::with_capacity(rows * columns);
+
+        for r in 0..rows {
+            for c in 0..columns {
+                id += 1;
+                contents.push(Cell::new(id, r, c, default_value));
+            }
+        }
+
         Arr2d {
-            contents: (0..rows)
-                .map(|r| {
-                    (0..columns)
-                        .map(|c| {
-                            id += 1;
-                            Cell::new(id, r, c, default_value)
-                        })
-                        .collect()
-                })
-                .collect(),
+            rows,
+            columns,
+            contents,
         }
     }
 
     pub fn get_cell(&self, row: usize, column: usize) -> Result<&Cell<T>, &str> {
-        match &self.contents.get(row) {
-            Some(r) => match r.get(column) {
+        match self.get_index(row, column) {
+            Ok(index) => match &self.contents.get(index) {
                 Some(c) => Ok(c),
-                None => return Err("Invalid column index"),
+                None => return Err("Invalid index"),
             },
-            None => return Err("Invalid row index"),
+            Err(_) => return Err("Invalid index"),
         }
     }
 
     pub fn all_cells(&self) -> impl Iterator<Item = &Cell<T>> {
-        self.contents.iter().flat_map(|row| row.into_iter())
+        self.contents.iter()
     }
 
     pub fn get_neighbours(&self, row: usize, column: usize) -> impl Iterator<Item = &Cell<T>> {
@@ -71,6 +99,7 @@ impl<T> Arr2d<T> {
         .into_iter()
         .filter_map(|(r, c)| {
             if let (Some(r), Some(c)) = (r, c) {
+                println!("Checking Cell {}, {}", r, c);
                 self.get_cell(r, c).ok()
             } else {
                 None

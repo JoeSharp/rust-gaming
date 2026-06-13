@@ -153,7 +153,7 @@ capturesB=23
                     .iter()
                     .cloned()
                     .collect(),
-                board: Arr2d::from_contents(vec![
+                board: Arr2d::from_2d_array(vec![
                     vec![Empty, White, Empty, Empty, Empty,],
                     vec![Empty, Empty, White, Empty, Empty],
                     vec![Empty, Black, Empty, Empty, Empty],

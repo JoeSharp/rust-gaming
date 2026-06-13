@@ -221,7 +221,7 @@ mod tests {
         // Then
         assert_eq!(
             state.board,
-            Arr2d::from_contents(vec![
+            Arr2d::from_2d_array(vec![
                 vec![Empty, Empty, Empty],
                 vec![Empty, Empty, Empty],
                 vec![Empty, Empty, Empty],

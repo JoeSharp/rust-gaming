@@ -1,51 +1,62 @@
+use crate::core::get_coordinates;
 use crate::{Arr2d, Cell};
 
 impl<T> Arr2d<T>
 where
     T: Copy,
 {
-    pub fn expand(&self, width: usize, height: usize, filler: T) -> Arr2d<T> {
-        let mut contents: Vec<Vec<T>> = self
-            .contents
-            .iter()
-            .map(|v| v.iter().map(|c| c.value()).collect())
-            .collect();
-
-        for row in contents.iter_mut() {
-            while row.len() < width {
-                row.push(filler);
-            }
-            while row.len() > width {
-                row.pop();
+    pub fn expand(&self, rows: usize, columns: usize, filler: T) -> Arr2d<T> {
+        let mut arr = Arr2d::with_size(rows, columns, filler);
+        for row in 0..usize::min(rows, self.rows) {
+            for col in 0..usize::min(columns, self.columns) {
+                if let Ok(c) = self.get(row, col) {
+                    arr.set(row, col, c.clone());
+                }
             }
         }
 
-        while contents.len() < height {
-            contents.push(vec![filler; width]);
-        }
-        while contents.len() > height {
-            contents.pop();
-        }
-
-        Arr2d::from_contents(contents)
+        arr
     }
 
-    pub fn from_contents(contents: Vec<Vec<T>>) -> Arr2d<T> {
+    pub fn from_2d_array(contents_2d: Vec<Vec<T>>) -> Arr2d<T> {
+        let rows = contents_2d.len();
+        let columns = contents_2d.first().map_or(0, |r| r.len());
+
+        let mut id = 0;
+        let mut contents = Vec::with_capacity(rows * columns);
+
+        for (r, row) in contents_2d.into_iter().enumerate() {
+            assert!(
+                row.len() == columns,
+                "All rows must have the same number of columns"
+            );
+
+            for (c, value) in row.into_iter().enumerate() {
+                id += 1;
+                contents.push(Cell::new(id, r, c, value));
+            }
+        }
+
+        Arr2d {
+            rows,
+            columns,
+            contents,
+        }
+    }
+
+    pub fn from_contents(rows: usize, columns: usize, contents: Vec<T>) -> Arr2d<T> {
         let mut id = 0;
 
         Arr2d {
+            rows,
+            columns,
             contents: contents
                 .iter()
                 .enumerate()
-                .map(|(row, row_c)| {
-                    row_c
-                        .iter()
-                        .enumerate()
-                        .map(|(column, &value)| {
-                            id += 1;
-                            Cell::new(id, row, column, value)
-                        })
-                        .collect()
+                .map(|(index, &value)| {
+                    id += 1;
+                    let (row, column) = get_coordinates(index, columns);
+                    Cell::new(id, row, column, value)
                 })
                 .collect(),
         }
@@ -59,9 +70,13 @@ where
 {
     pub fn to_str(&self) -> String {
         let mut as_str = String::new();
-        for row in &self.contents {
-            for cell in row {
-                as_str.push(cell.value().into());
+
+        as_str.push_str(&format!("Rows {}, Columns {}\n", self.rows, self.columns));
+        for row in 0..self.rows {
+            for col in 0..self.columns {
+                if let Ok(value) = self.get(row, col) {
+                    as_str.push((*value).into())
+                }
             }
             as_str.push_str("\n");
         }
@@ -79,7 +94,7 @@ mod tests {
     fn test_expand() {
         // Given
         let a: Arr2d<TestBool> = Arr2d::new();
-        let expected: Arr2d<TestBool> = Arr2d::from_contents(vec![
+        let expected: Arr2d<TestBool> = Arr2d::from_2d_array(vec![
             vec![
                 TestBool::from(false),
                 TestBool::from(false),
@@ -108,7 +123,7 @@ mod tests {
         ]);
 
         // When
-        let result = a.expand(3, 5, TestBool::from(false));
+        let result = a.expand(5, 3, TestBool::from(false));
 
         // Then
         assert_eq!(expected, result);

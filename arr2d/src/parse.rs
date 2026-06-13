@@ -6,20 +6,23 @@ where
     T: TryFrom<char>,
 {
     pub fn from_lines<'a>(lines: impl Iterator<Item = &'a str>) -> Result<Arr2d<T>, ParseError> {
-        let mut rows: Vec<Vec<T>> = Vec::new();
+        let mut rows = 0;
+        let mut cols: usize = 0;
+        let mut cells: Vec<T> = Vec::new();
 
         for row in lines {
-            let mut cells: Vec<T> = Vec::new();
-            for cell in row.trim().chars() {
+            rows += 1;
+            let trimmed_row = row.trim();
+            cols = usize::max(cols, trimmed_row.len());
+            for cell in trimmed_row.chars() {
                 match <T>::try_from(cell) {
                     Ok(v) => cells.push(v),
                     Err(_) => return Err(ParseError::InvalidCharacter),
                 }
             }
-            rows.push(cells);
         }
 
-        Ok(Arr2d::from_contents(rows))
+        Ok(Arr2d::from_contents(rows, cols, cells))
     }
 
     pub fn from_str(as_str: &str) -> Result<Arr2d<T>, ParseError> {
@@ -40,7 +43,7 @@ mod tests {
     #[test]
     fn test_from_str() {
         // Given
-        let expected: Arr2d<TestBool> = Arr2d::from_contents(vec![
+        let expected: Arr2d<TestBool> = Arr2d::from_2d_array(vec![
             vec![
                 TestBool::from(true),
                 TestBool::from(true),

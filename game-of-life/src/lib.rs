@@ -96,13 +96,11 @@ impl GameOfLife {
     pub fn iterate(&mut self) {
         let next_index = if self.index == 0 { 1 } else { 0 };
         for r in 0..self.contents[self.index].rows() {
-            for c in 0..self.contents[self.index].columns(r) {
+            for c in 0..self.contents[self.index].columns() {
                 let n = Self::count_neighbours(&self.contents[self.index], r, c);
-                self.contents[next_index].set(
-                    r,
-                    c,
-                    Self::next_state((*self.contents[self.index].get(r, c), n)),
-                );
+                if let Ok(current) = self.contents[self.index].get(r, c) {
+                    self.contents[next_index].set(r, c, Self::next_state((*current, n)));
+                }
             }
         }
         self.index = next_index;
@@ -122,30 +120,42 @@ impl GameOfLife {
         let top = r > 0;
         let left = c > 0;
         let bottom = r < arr2d.rows() - 1;
-        let right = c < arr2d.columns(r) - 1;
+        let right = c < arr2d.columns() - 1;
 
-        if top && left && GolCell::Alive == *arr2d.get(r - 1, c - 1) {
+        if top
+            && left
+            && let Ok(GolCell::Alive) = arr2d.get(r - 1, c - 1)
+        {
             n += 1;
         }
-        if top && GolCell::Alive == *arr2d.get(r - 1, c) {
+        if top && let Ok(GolCell::Alive) = arr2d.get(r - 1, c) {
             n += 1;
         }
-        if top && right && GolCell::Alive == *arr2d.get(r - 1, c + 1) {
+        if top
+            && right
+            && let Ok(GolCell::Alive) = arr2d.get(r - 1, c + 1)
+        {
             n += 1;
         }
-        if left && GolCell::Alive == *arr2d.get(r, c - 1) {
+        if left && let Ok(GolCell::Alive) = arr2d.get(r, c - 1) {
             n += 1;
         }
-        if right && GolCell::Alive == *arr2d.get(r, c + 1) {
+        if right && let Ok(GolCell::Alive) = arr2d.get(r, c + 1) {
             n += 1;
         }
-        if bottom && left && GolCell::Alive == *arr2d.get(r + 1, c - 1) {
+        if bottom
+            && left
+            && let Ok(GolCell::Alive) = arr2d.get(r + 1, c - 1)
+        {
             n += 1;
         }
-        if bottom && GolCell::Alive == *arr2d.get(r + 1, c) {
+        if bottom && let Ok(GolCell::Alive) = arr2d.get(r + 1, c) {
             n += 1;
         }
-        if bottom && right && GolCell::Alive == *arr2d.get(r + 1, c + 1) {
+        if bottom
+            && right
+            && let Ok(GolCell::Alive) = arr2d.get(r + 1, c + 1)
+        {
             n += 1;
         }
 

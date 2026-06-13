@@ -20,5 +20,7 @@ pub enum ParseError {
 
 #[derive(Debug, Hash, Eq)]
 pub struct Arr2d<T> {
-    contents: Vec<Vec<Cell<T>>>,
+    rows: usize,
+    columns: usize,
+    contents: Vec<Cell<T>>,
 }

@@ -7,12 +7,14 @@ where
     T: Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for row in &self.contents {
-            for (i, val) in row.iter().enumerate() {
-                if i > 0 {
+        for row in 0..self.rows {
+            for col in 0..self.columns {
+                if col > 0 {
                     write!(f, " ")?;
                 }
-                write!(f, "{}", val)?;
+                if let Ok(v) = self.get(row, col) {
+                    write!(f, "{}", v)?;
+                }
             }
             write!(f, "\n")?;
         }
