@@ -70,7 +70,7 @@ impl GameOfLife {
         }
     }
 
-    pub fn next_state(state: (GolCell, u8)) -> GolCell {
+    pub fn next_state(state: (&GolCell, u8)) -> GolCell {
         match state {
             (GolCell::Alive, 0..=1) => GolCell::Dead, // Underpopulation
             (GolCell::Alive, 2 | 3) => GolCell::Alive, // Lives on
@@ -94,16 +94,24 @@ impl GameOfLife {
     }
 
     pub fn iterate(&mut self) {
-        let next_index = if self.index == 0 { 1 } else { 0 };
-        for r in 0..self.contents[self.index].rows() {
-            for c in 0..self.contents[self.index].columns() {
-                let n = Self::count_neighbours(&self.contents[self.index], r, c);
-                if let Ok(current) = self.contents[self.index].get(r, c) {
-                    self.contents[next_index].set(r, c, Self::next_state((*current, n)));
+        // split the borrows
+        let (current, next) = if self.index == 0 {
+            let (a, b) = self.contents.split_at_mut(1);
+            (&a[0], &mut b[0])
+        } else {
+            let (a, b) = self.contents.split_at_mut(1);
+            (&b[0], &mut a[0])
+        };
+
+        for r in 0..current.rows() {
+            for c in 0..current.columns() {
+                let n = Self::count_neighbours(&current, r, c);
+                if let Ok(current) = current.get(r, c) {
+                    next.set(r, c, Self::next_state((current, n)));
                 }
             }
         }
-        self.index = next_index;
+        self.index = if self.index == 0 { 1 } else { 0 };
     }
 
     pub fn to_str(&self) -> String {
@@ -180,8 +188,8 @@ mod tests {
 
     #[test]
     fn test_next_state() {
-        assert_eq!(GolCell::Dead, GameOfLife::next_state((GolCell::Alive, 1)));
-        assert_eq!(GolCell::Dead, GameOfLife::next_state((GolCell::Alive, 4)));
+        assert_eq!(GolCell::Dead, GameOfLife::next_state((&GolCell::Alive, 1)));
+        assert_eq!(GolCell::Dead, GameOfLife::next_state((&GolCell::Alive, 4)));
     }
 
     #[test]
